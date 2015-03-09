@@ -1,0 +1,358 @@
+package graph;
+
+import org.junit.Test;
+import static org.junit.Assert.*;
+import java.util.Random;
+import java.util.LinkedList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Iterator;
+import static java.util.Arrays.asList;
+
+/** Unit tests for the Graph class.
+ *  @author Haojun Li
+ */
+public class GraphTesting {
+    /** This tests the basic functionality such as add and remove. */
+    @Test
+    public void testBasic() {
+        Graph g = new DirectedGraph();
+        for (int i = 1; i <= 10; i += 1) {
+            assertEquals(i, g.add());
+        }
+        assertEquals(10, g.vertexSize());
+        assertEquals(10, g.maxVertex());
+        assertEquals(0, g.edgeSize());
+        g.add();
+        assertEquals(11, g.vertexSize());
+        assertEquals(11, g.maxVertex());
+        for (int i = 1; i <= 10; i += 2) {
+            g.remove(i);
+        }
+        assertEquals(6, g.vertexSize());
+        assertEquals(11, g.maxVertex());
+        assertEquals(0, g.edgeSize());
+    }
+
+    /** This is the complex test testing add and remove. */
+    @Test
+    public void testComplex() {
+        Graph g = new UndirectedGraph();
+        for (int i = 1; i <= 10; i += 1) {
+            g.add();
+        }
+        for (int i = 1; i <= 10; i += 2) {
+            g.remove(i);
+        }
+        for (int i = 1; i <= 10; i += 2) {
+            assertEquals(i, g.add());
+        }
+    }
+
+    /** This is the test for basic linking for both directed and undirected
+     *  graphs. */
+    @Test
+    public void testLink() {
+        Graph dg = new DirectedGraph();
+        Graph ug = new UndirectedGraph();
+        for (int i = 0; i <= 10; i += 1) {
+            dg.add();
+            ug.add();
+        }
+        dg.add(1, 3);
+        assertTrue(dg.contains(1, 3));
+        assertFalse(dg.contains(3, 1));
+        assertFalse(dg.contains(1, 4));
+        ug.add(5, 4);
+        assertTrue(ug.contains(5, 4));
+        assertTrue(ug.contains(4, 5));
+        assertFalse(ug.contains(1, 3));
+        dg.add(3, 1);
+        dg.remove(1, 3);
+        assertFalse(dg.contains(1, 3));
+        assertTrue(dg.contains(3, 1));
+        ug.remove(5, 4);
+        assertFalse(ug.contains(4, 5));
+        assertFalse(ug.contains(5, 4));
+    }
+
+    /** This is a test for the removal of a certain node. */
+    @Test
+    public void testRemove() {
+        Graph dg = new DirectedGraph();
+        Graph ug = new UndirectedGraph();
+        int [] range = new int[10];
+        for (int i = 1; i <= range.length; i += 1) {
+            range[i - 1] = i;
+            dg.add();
+            ug.add();
+            dg.add(1, i);
+            ug.add(1, i);
+        }
+        assertEquals(10, dg.edgeSize());
+        assertEquals(10, ug.edgeSize());
+        for (int u : range) {
+            if (u == 1) {
+                continue;
+            }
+            assertTrue(dg.contains(1, u));
+            assertFalse(dg.contains(u, 1));
+            assertTrue(ug.contains(1, u));
+            assertTrue(ug.contains(u, 1));
+        }
+        dg.add(2, 1);
+        assertTrue(dg.contains(1, 2));
+        assertTrue(dg.contains(2, 1));
+        dg.remove(2);
+        assertFalse(dg.contains(1, 2));
+        assertFalse(dg.contains(2, 1));
+        for (int i = 3; i < range.length; i += 1) {
+            assertTrue(dg.contains(1, i));
+            assertFalse(dg.contains(i, 1));
+        }
+        ug.remove(2);
+        assertFalse(ug.contains(1, 2));
+        assertFalse(ug.contains(2, 1));
+        dg.remove(1);
+        ug.remove(1);
+        for (int i : range) {
+            for (int j : range) {
+                if (i == j) {
+                    continue;
+                } else {
+                    assertFalse(dg.contains(i, j));
+                    assertFalse(dg.contains(j, i));
+                    assertFalse(ug.contains(i, j));
+                    assertFalse(ug.contains(j, i));
+                }
+            }
+        }
+        assertEquals(0, dg.edgeSize());
+        assertEquals(0, ug.edgeSize());
+    }
+
+    /** This is a random exhaustive test for both directed and undirected
+     *  graphs. */
+    @Test
+    public void randExhaustive() {
+        Random rand = new Random();
+        Graph dg = new DirectedGraph();
+        Graph ug = new UndirectedGraph();
+        int numNodes = 100;
+        for (int i = 1; i <= numNodes; i += 1) {
+            dg.add();
+            ug.add();
+        }
+        for (int i = 1; i <= numNodes; i += 1) {
+            for (int j = 1; j <= numNodes; j += 1) {
+                assertFalse(dg.contains(i, j));
+                assertFalse(dg.contains(j, i));
+                assertFalse(ug.contains(i, j));
+                assertFalse(ug.contains(j, i));
+            }
+        }
+
+        int[][] dChildren = new int[numNodes][numNodes];
+        int[][] udChildren = new int[numNodes][numNodes];
+        for (int i = 1; i <= dChildren.length; i += 1) {
+            int[] dChild = dChildren[i - 1];
+            int[] udChild = udChildren[i - 1];
+            for (int j = 1; j < 5; j += 1) {
+                int num = rand.nextInt(numNodes) + 1;
+                while (num == i) {
+                    num = rand.nextInt(numNodes) + 1;
+                }
+                dg.add(i, num);
+                ug.add(i, num);
+                dChild[num - 1] = udChild[num - 1] = 1;
+                udChildren[num - 1][i - 1] = 1;
+            }
+        }
+        testDirected(dChildren, dg);
+        testUndirected(udChildren, ug);
+    }
+
+    /** This is the method to test the directed graph of parameter
+     *  a list DCHILDREN, and a directed graph DG. **/
+    private void testDirected(int[][] dChildren, Graph dg) {
+        for (int i = 1; i <= dChildren.length; i += 1) {
+            for (int successor : dg.successors(i)) {
+                assertTrue(dg.contains(i, successor));
+            }
+            for (int predecessor : dg.predecessors(i)) {
+                assertTrue(dg.contains(predecessor, i));
+            }
+            int[] child = dChildren[i - 1];
+            for (int j = 1; j <= child.length; j += 1) {
+                if (child[j - 1] == 1) {
+                    assertTrue(dg.contains(i, j));
+                } else {
+                    assertFalse(dg.contains(i, j));
+                }
+            }
+        }
+    }
+
+    /** This is the method to test the undirected graph of
+     *  parameter a list UNCHILDREN, and an undirected graph UG. */
+    private void testUndirected(int[][] udChildren, Graph ug) {
+        for (int i = 1; i <= udChildren.length; i += 1) {
+            for (int successor : ug.successors(i)) {
+                assertTrue(ug.contains(i, successor));
+                assertTrue(ug.contains(successor, i));
+            }
+            for (int predecessor : ug.predecessors(i)) {
+                assertTrue(ug.contains(i, predecessor));
+                assertTrue(ug.contains(predecessor, i));
+            }
+            int [] child = udChildren[i - 1];
+            for (int j = 1; j <= child.length; j += 1) {
+                if (child[j - 1] == 1) {
+                    assertTrue(ug.contains(i, j));
+                    assertTrue(ug.contains(j, i));
+                } else {
+                    assertFalse(ug.contains(i, j));
+                    assertFalse(ug.contains(j, i));
+                }
+            }
+        }
+    }
+    /** This is the test for the edge implementation. */
+    @Test
+    public void testEdge() {
+        Random rand = new Random();
+        Graph dg = new DirectedGraph();
+        Graph ug = new UndirectedGraph();
+        HashMap<Integer, LinkedList<Integer>> adjacency =
+            new HashMap<Integer, LinkedList<Integer>>();
+        int numNodes = 100;
+        for (int i = 1; i <= numNodes; i += 1) {
+            dg.add();
+            ug.add();
+        }
+        dg.add(5, 6);
+        LinkedList<Integer> link = new LinkedList<Integer>();
+        link.add(6);
+        adjacency.put(5, link);
+        for (int[] edge : dg.edges()) {
+            assertTrue(adjacency.get(edge[0]).contains(edge[1]));
+        }
+        adjacency.clear();
+        dg.remove(5, 6);
+        for (int i = 1; i <= numNodes; i += 1) {
+            LinkedList<Integer> temp = new LinkedList<Integer>();
+            adjacency.put(i, temp);
+            for (int j = 1; j <= numNodes / 2; j += 1) {
+                int num = rand.nextInt(numNodes) + 1;
+                while (num == i) {
+                    num = rand.nextInt(numNodes) + 1;
+                }
+                temp.add(num);
+                dg.add(i, num);
+                ug.add(i, num);
+            }
+        }
+        for (int[] edge : dg.edges()) {
+            assertTrue(adjacency.get(edge[0]).contains(edge[1]));
+        }
+        for (int[] edge : ug.edges()) {
+            assertTrue(adjacency.get(edge[0]).contains(edge[1]));
+        }
+    }
+
+    @Test
+    public void emptyGraph() {
+        DirectedGraph g = new DirectedGraph();
+        assertEquals("Initial graph has vertices", 0, g.vertexSize());
+        assertEquals("Initial graph has edges", 0, g.edgeSize());
+    }
+
+    @Test
+    public void testBetterAdd() {
+        DirectedGraph g = new DirectedGraph();
+        assertEquals(1, g.add());
+        assertEquals(2, g.add());
+        assertEquals(3, g.add());
+        g.remove(1);
+        assertEquals(1, g.add());
+        g.add();
+        g.add(1, 2);
+        g.add(2, 3);
+        g.add(3, 4);
+        assertEquals(0, g.edgeId(1, 3));
+        assertEquals(0, g.edgeId(1, 4));
+        assertEquals(0, g.edgeId(2, 4));
+        assertEquals(1, g.edgeId(1, 2));
+        assertEquals(2, g.edgeId(2, 3));
+        assertEquals(3, g.edgeId(3, 4));
+        g.remove(2, 3);
+        assertEquals(0, g.edgeId(2, 3));
+        g.add(1, 4);
+        assertEquals(2, g.edgeId(1, 4));
+    }
+
+    /** This is each random trial. */
+    @Test
+    public void randomTest() {
+        DirectedGraph g = new DirectedGraph();
+        Random rand = new Random();
+        HashMap<Integer, HashSet<Integer>> preds =
+            new HashMap<Integer, HashSet<Integer>>();
+        HashMap<Integer, HashSet<Integer>> succs =
+            new HashMap<Integer, HashSet<Integer>>();
+        for (int i = 1; i <= 100; i += 1) {
+            g.add();
+            preds.put(i, new HashSet<Integer>());
+            succs.put(i, new HashSet<Integer>());
+        }
+        for (int i = 1; i <= 100; i += 1) {
+            for (int j = 1; j <= 50; j += 1) {
+                int succ = rand.nextInt(100) + 1;
+                while (succ == i) {
+                    succ = rand.nextInt(100) + 1;
+                }
+                g.add(i, succ);
+                preds.get(succ).add(i);
+                succs.get(i).add(succ);
+            }
+        }
+        for (int i = 1; i <= 100; i += 1) {
+            assertEquals(g.outDegree(i), succs.get(i).size());
+            assertEquals(g.inDegree(i), preds.get(i).size());
+            for (int successor : g.successors(i)) {
+                assertTrue(succs.get(i).contains(successor));
+            }
+            for (int predecessor : g.predecessors(i)) {
+                assertTrue(preds.get(i).contains(predecessor));
+            }
+        }
+    }
+
+    @Test
+    public void testOrdering() {
+        Graph dg = new DirectedGraph();
+        for (int i = 0; i < 4; i += 1) {
+            dg.add();
+        }
+        dg.add(1, 3);
+        dg.add(1, 4);
+        dg.add(1, 2);
+        assertEquals(3, dg.successor(1, 0));
+        assertEquals(4, dg.successor(1, 1));
+        assertEquals(2, dg.successor(1, 2));
+        List<Integer> temp = new LinkedList<Integer>();
+        for (int successor : dg.successors(1)) {
+            temp.add(successor);
+        }
+        assertEquals(asList(3, 4, 2), temp);
+        Iterator<int[]> temp2 = asList(new int[] {1, 3},
+                                       new int[] {1, 4},
+                                       new int[] {1, 2}).iterator();
+        for (int[] edge : dg.edges()) {
+            int[] next = temp2.next();
+            assertEquals(next[0], edge[0]);
+            assertEquals(next[1], edge[1]);
+        }
+    }
+}
