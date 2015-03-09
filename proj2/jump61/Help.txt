@@ -1,0 +1,21 @@
+SUMMARY OF TEXTUAL INPUT FOR THE GAME
+
+clear - Abandons the current game (if one is in progress), and clears the board to its initial configuration (all squares neutral with one spot). Playing stops until the next start command.
+
+start - Start playing from the current position, if not doing so already (has no effect if currently playing). Takes moves alternately from Red and Blue according to their color and the current total number of spots on the board: if the spot count plus the board size is even, it is Red’s move, and iff odd, Blue’s move.
+
+quit - Exits the program.
+
+auto P - Stops the current game until the next start command and causes player P to be played by an automated player(anAI) on subsequent moves. The value P must be “red” or “blue” (ignore case—“Red” or “RED” also work). Initially, Blue is an automated player.  
+
+manual P - Stops the current game until the next start command and causes player P to take moves from the terminal on subsequent moves. The value of P is as for the auto command. Initially, Red is a manual player. 
+
+size N - Stops any current game, clears the board to its initial configuration, and sets the size of the board to N.
+
+set - Stops any current game until the next start command and causes player P to take moves from the terminal on subsequent moves.  
+
+dump - Prints out the board.
+
+
+help - Prints the brief summary of the commands.
+
