@@ -1,4 +1,8 @@
-This directory contains a skeleton for CS61B Project 1.
+This project involves writing a miniature relational database management system (DBMS)
+that stores tables of data, where a table consists of some number of labeled columns of
+information. Our system will include a very simple query language for extracting information
+from these tables. For the purposes of this project, we will deal only with very small databases,
+and therefore will not consider speed and efficiency at all.
 
 CONTENTS:
 
