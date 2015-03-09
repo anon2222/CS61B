@@ -1,0 +1,61 @@
+package db61b;
+
+import org.junit.Test;
+import static org.junit.Assert.*;
+import java.util.Scanner;
+/** Tests basics functionality including:
+ *  1. The row class.
+ */
+public class BasicTests {
+    /** The test for the row class.*/
+    @Test
+    public void testRow() {
+        Row r = new Row(new String[]{"I", "love", "Meow", "Meow", "Meows"});
+        Row w = new Row(new String[]{"I", "love", "Meow", "Meow", "Meows"});
+        assertEquals(5, r.size());
+        assertEquals("Meow", r.get(3));
+        assertEquals("I", r.get(0));
+        assertTrue(r.equals(w));
+        
+    }
+
+    /** The test for the table class.*/
+    @Test
+    public void testTable() {
+        Row r = new Row(new String[]{"good", "good", "good"});
+        Row r2 = new Row(new String[]{"good", "good", "good"});
+        String[] names = new String[]{"Song1", "Song2", "Song3"};
+        Table t = new Table(names);
+        assertTrue(t.add(r));
+        assertFalse(t.add(r2));
+        System.out.println("testing table");
+        t.print();
+    }
+
+    /** The test for the database class.*/
+    @Test
+    public void testDatabase() {
+        Row r = new Row(new String[]{"good", "good", "good"});
+        String[] names = new String[]{"Song1", "Song2", "Song3"};
+        Table t = new Table(names);
+        t.add(r);
+        Database d = new Database();
+        d.put("weirdtable", t);
+        System.out.println("testing DB");
+        d.get("weirdtable").print();
+    }
+
+    /** The test for the CommandInterpreter class. */
+    @Test
+    public void testLoad() {
+        Scanner s = new Scanner("load test; print test;");
+        CommandInterpreter interpreter =
+            new CommandInterpreter(s, System.out);
+        interpreter.statement();
+        interpreter.statement();
+    }
+    
+    public static void main(String[] args) {
+        System.exit(ucb.junit.textui.runClasses(BasicTests.class));
+    }
+}
